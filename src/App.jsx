@@ -1,31 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChefHat, Plus, Clock, BookOpen, ArrowLeft, Trash2, Search, ShoppingCart, CheckCircle2, Circle, Flame } from 'lucide-react';
-
-const INITIAL_RECIPES = [
-  {
-    id: '1',
-    title: 'Garlic Butter Roasted Chicken',
-    prepTime: '15 mins',
-    cookTime: '1 hr',
-    category: 'Dinner',
-    macros: { calories: '450', protein: '45g', carbs: '2g', fats: '28g' },
-    ingredients: ['1 whole chicken (3-4 lbs)', '1/2 cup butter, softened', '4 cloves garlic, minced', '1 tbsp fresh rosemary', 'Salt and black pepper'],
-    instructions: '1. Preheat oven to 400°F (200°C).\n2. Mix butter, garlic, and rosemary.\n3. Rub mixture under the skin and all over the chicken.\n4. Season generously with salt and pepper.\n5. Roast for about 1 hour or until internal temperature reaches 165°F.',
-  },
-  {
-    id: '2',
-    title: 'Classic Fluffy Pancakes',
-    prepTime: '10 mins',
-    cookTime: '15 mins',
-    category: 'Breakfast',
-    macros: { calories: '350', protein: '8g', carbs: '45g', fats: '14g' },
-    ingredients: ['1 1/2 cups all-purpose flour', '3 1/2 tsp baking powder', '1 tsp salt', '1 tbsp white sugar', '1 1/4 cups milk', '1 egg', '3 tbsp butter, melted'],
-    instructions: '1. In a large bowl, sift together the flour, baking powder, salt and sugar.\n2. Make a well in the center and pour in the milk, egg and melted butter; mix until smooth.\n3. Heat a lightly oiled griddle or frying pan over medium high heat.\n4. Pour or scoop the batter onto the griddle, using approximately 1/4 cup for each pancake. Brown on both sides and serve hot.',
-  }
-];
+import { collection, addDoc, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
+import { db } from './firebase';
 
 export default function App() {
-  const [recipes, setRecipes] = useState(INITIAL_RECIPES);
+  const [recipes, setRecipes] = useState([]);
   const [currentView, setCurrentView] = useState('list'); // 'list', 'detail', 'add', 'groceries'
   const [selectedRecipeId, setSelectedRecipeId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,6 +25,17 @@ export default function App() {
     instructions: ''
   });
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, 'recipes'), (snapshot) => {
+      const recipesData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setRecipes(recipesData);
+    });
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, []);
+
   const selectedRecipe = recipes.find(r => r.id === selectedRecipeId);
 
   const filteredRecipes = recipes.filter(r => 
@@ -53,10 +43,9 @@ export default function App() {
     r.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSaveRecipe = (e) => {
+  const handleSaveRecipe = async (e) => {
     e.preventDefault();
     const recipeToAdd = {
-      id: Date.now().toString(),
       title: newRecipe.title,
       prepTime: newRecipe.prepTime,
       cookTime: newRecipe.cookTime,
@@ -71,15 +60,23 @@ export default function App() {
       instructions: newRecipe.instructions
     };
     
-    setRecipes([recipeToAdd, ...recipes]);
-    setCurrentView('list');
-    setNewRecipe({ title: '', prepTime: '', cookTime: '', category: 'Dinner', calories: '', protein: '', carbs: '', fats: '', ingredients: '', instructions: '' });
+    try {
+      await addDoc(collection(db, 'recipes'), recipeToAdd);
+      setCurrentView('list');
+      setNewRecipe({ title: '', prepTime: '', cookTime: '', category: 'Dinner', calories: '', protein: '', carbs: '', fats: '', ingredients: '', instructions: '' });
+    } catch (error) {
+      console.error("Error adding recipe: ", error);
+    }
   };
 
-  const handleDelete = (id) => {
-    setRecipes(recipes.filter(r => r.id !== id));
-    setSelectedForGroceries(selectedForGroceries.filter(recipeId => recipeId !== id));
-    setCurrentView('list');
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'recipes', id));
+      setSelectedForGroceries(selectedForGroceries.filter(recipeId => recipeId !== id));
+      setCurrentView('list');
+    } catch (error) {
+      console.error("Error deleting recipe: ", error);
+    }
   };
 
   const toggleGrocerySelection = (e, id) => {
