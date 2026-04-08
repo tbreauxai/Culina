@@ -116,7 +116,7 @@ export default function App() {
           onClick={() => setCurrentView('add')}
           className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-xl hover:bg-orange-700 transition w-full sm:w-auto justify-center"
         >
-          <Plus w-5 h-5 /> Add Recipe
+          <Plus className="w-5 h-5" /> Add Recipe
         </button>
       </div>
 
