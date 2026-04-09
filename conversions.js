@@ -21,13 +21,23 @@ export const UNIT_LABELS = {
 };
 
 /**
- * Converts an amount from grams to the target unit.
+ * Converts an amount from one unit to another via grams base.
  */
-export function convertFromGrams(amountInGrams, targetUnit) {
-  if (!CONVERSION_RATES[targetUnit]) return amountInGrams;
+export function convertAmount(amount, fromUnit, toUnit) {
+  let parsedAmount;
+  // Support strings like "1/2" as fractions
+  if (typeof amount === 'string' && amount.includes('/')) {
+    const [num, den] = amount.split('/');
+    parsedAmount = parseFloat(num) / parseFloat(den);
+  } else {
+    parsedAmount = parseFloat(amount);
+  }
+  if (isNaN(parsedAmount)) return amount;
   
-  const converted = amountInGrams / CONVERSION_RATES[targetUnit];
+  const fromRate = CONVERSION_RATES[fromUnit];
+  const toRate = CONVERSION_RATES[toUnit];
+  if (!fromRate || !toRate) return amount;
   
-  // Clean up the formatting (e.g., 1.50 -> 1.5, 1.333 -> 1.33)
+  const converted = (parsedAmount * fromRate) / toRate;
   return Number(converted.toFixed(2));
 }

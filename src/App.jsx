@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChefHat, Plus, Clock, BookOpen, ArrowLeft, Trash2, Search, ShoppingCart, CheckCircle2, Circle, Flame } from 'lucide-react';
 import { collection, addDoc, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
+import IngredientItem from './components/IngredientItem';
 
 export default function App() {
   const [recipes, setRecipes] = useState([]);
@@ -295,16 +296,10 @@ export default function App() {
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-orange-500"/> Ingredients
             </h2>
-            <ul className="space-y-2">
-              {selectedRecipe.ingredients.map((ing, idx) => {
-                const ingDisplay = typeof ing === 'string' ? ing : [ing.amount, ing.unit, ing.name].filter(Boolean).join(' ');
-                return (
-                  <li key={idx} className="flex items-start gap-2 text-gray-700 border-b border-gray-100 pb-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2 flex-shrink-0"></span>
-                    {ingDisplay}
-                  </li>
-                );
-              })}
+            <ul className="space-y-1">
+              {selectedRecipe.ingredients.map((ing, idx) => (
+                <IngredientItem key={idx} ingredient={ing} />
+              ))}
             </ul>
           </div>
           
