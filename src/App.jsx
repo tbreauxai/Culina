@@ -10,6 +10,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedForGroceries, setSelectedForGroceries] = useState([]);
   const [checkedGroceries, setCheckedGroceries] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Form State
   const [newRecipe, setNewRecipe] = useState({
@@ -45,6 +46,9 @@ export default function App() {
 
   const handleSaveRecipe = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
+    setIsSaving(true);
+
     const recipeToAdd = {
       title: newRecipe.title,
       prepTime: newRecipe.prepTime,
@@ -66,6 +70,9 @@ export default function App() {
       setNewRecipe({ title: '', prepTime: '', cookTime: '', category: 'Dinner', calories: '', protein: '', carbs: '', fats: '', ingredients: '', instructions: '' });
     } catch (error) {
       console.error("Error adding recipe: ", error);
+      alert("Failed to save recipe. Please check your browser console or Firebase rules.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -439,8 +446,8 @@ export default function App() {
           />
         </div>
 
-        <button type="submit" className="w-full bg-orange-600 text-white font-bold py-3 rounded-xl hover:bg-orange-700 transition">
-          Save Recipe
+        <button type="submit" disabled={isSaving} className="w-full bg-orange-600 text-white font-bold py-3 rounded-xl hover:bg-orange-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+          {isSaving ? 'Saving to Firebase...' : 'Save Recipe'}
         </button>
       </form>
     </div>
