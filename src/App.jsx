@@ -22,7 +22,7 @@ export default function App() {
     protein: '',
     carbs: '',
     fats: '',
-    ingredients: '',
+    ingredients: [{ name: '', amount: '', unit: '' }],
     instructions: ''
   });
 
@@ -60,14 +60,14 @@ export default function App() {
         carbs: newRecipe.carbs || '-',
         fats: newRecipe.fats || '-'
       },
-      ingredients: newRecipe.ingredients.split('\n').filter(i => i.trim() !== ''),
+      ingredients: newRecipe.ingredients.filter(i => i.name.trim() !== ''),
       instructions: newRecipe.instructions
     };
     
     try {
       await addDoc(collection(db, 'recipes'), recipeToAdd);
       setCurrentView('list');
-      setNewRecipe({ title: '', prepTime: '', cookTime: '', category: 'Dinner', calories: '', protein: '', carbs: '', fats: '', ingredients: '', instructions: '' });
+      setNewRecipe({ title: '', prepTime: '', cookTime: '', category: 'Dinner', calories: '', protein: '', carbs: '', fats: '', ingredients: [{ name: '', amount: '', unit: '' }], instructions: '' });
     } catch (error) {
       console.error("Error adding recipe: ", error);
       alert("Failed to save recipe. Please check your browser console or Firebase rules.");
@@ -206,7 +206,8 @@ export default function App() {
               <h3 className="font-bold text-lg text-gray-800 mb-4 pb-2 border-b border-gray-200">{recipe.title}</h3>
               <ul className="space-y-3">
                 {recipe.ingredients.map((ing, idx) => {
-                  const uniqueKey = `${recipe.id}-${idx}-${ing}`;
+                  const ingDisplay = typeof ing === 'string' ? ing : [ing.amount, ing.unit, ing.name].filter(Boolean).join(' ');
+                  const uniqueKey = `${recipe.id}-${idx}-${ingDisplay}`;
                   const isChecked = checkedGroceries.includes(uniqueKey);
                   return (
                     <li 
@@ -218,7 +219,7 @@ export default function App() {
                         {isChecked ? <CheckCircle2 className="w-5 h-5 text-orange-500" /> : <Circle className="w-5 h-5" />}
                       </button>
                       <span className={`text-gray-700 transition ${isChecked ? 'line-through text-gray-400' : ''}`}>
-                        {ing}
+                        {ingDisplay}
                       </span>
                     </li>
                   );
@@ -295,12 +296,15 @@ export default function App() {
               <BookOpen className="w-5 h-5 text-orange-500"/> Ingredients
             </h2>
             <ul className="space-y-2">
-              {selectedRecipe.ingredients.map((ing, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-gray-700 border-b border-gray-100 pb-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2 flex-shrink-0"></span>
-                  {ing}
-                </li>
-              ))}
+              {selectedRecipe.ingredients.map((ing, idx) => {
+                const ingDisplay = typeof ing === 'string' ? ing : [ing.amount, ing.unit, ing.name].filter(Boolean).join(' ');
+                return (
+                  <li key={idx} className="flex items-start gap-2 text-gray-700 border-b border-gray-100 pb-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2 flex-shrink-0"></span>
+                    {ingDisplay}
+                  </li>
+                );
+              })}
             </ul>
           </div>
           
@@ -423,15 +427,67 @@ export default function App() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients (One per line)</label>
-          <textarea 
-            required
-            rows="5"
-            value={newRecipe.ingredients}
-            onChange={(e) => setNewRecipe({...newRecipe, ingredients: e.target.value})}
-            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
-            placeholder="2 cups flour&#10;1 cup sugar&#10;3 eggs"
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients</label>
+          <div className="space-y-3">
+            {newRecipe.ingredients.map((ing, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Qty (e.g. 2)" 
+                  value={ing.amount}
+                  onChange={(e) => {
+                    const newIngs = [...newRecipe.ingredients];
+                    newIngs[idx].amount = e.target.value;
+                    setNewRecipe({...newRecipe, ingredients: newIngs});
+                  }}
+                  className="w-20 sm:w-24 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
+                />
+                <input 
+                  type="text" 
+                  placeholder="Unit (g, oz)" 
+                  value={ing.unit}
+                  onChange={(e) => {
+                    const newIngs = [...newRecipe.ingredients];
+                    newIngs[idx].unit = e.target.value;
+                    setNewRecipe({...newRecipe, ingredients: newIngs});
+                  }}
+                  className="w-24 sm:w-32 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
+                />
+                <input 
+                  type="text" 
+                  placeholder="Ingredient Name" 
+                  required
+                  value={ing.name}
+                  onChange={(e) => {
+                    const newIngs = [...newRecipe.ingredients];
+                    newIngs[idx].name = e.target.value;
+                    setNewRecipe({...newRecipe, ingredients: newIngs});
+                  }}
+                  className="flex-1 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 outline-none min-w-0"
+                />
+                {newRecipe.ingredients.length > 1 && (
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const newIngs = newRecipe.ingredients.filter((_, i) => i !== idx);
+                      setNewRecipe({...newRecipe, ingredients: newIngs});
+                    }}
+                    className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition flex-shrink-0"
+                    title="Remove ingredient"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button 
+            type="button"
+            onClick={() => setNewRecipe({...newRecipe, ingredients: [...newRecipe.ingredients, { name: '', amount: '', unit: '' }]})}
+            className="text-orange-600 font-semibold hover:text-orange-700 flex items-center gap-1 mt-3 px-2 py-1 rounded-lg hover:bg-orange-50 transition inline-flex"
+          >
+            <Plus className="w-4 h-4" /> Add Another Ingredient
+          </button>
         </div>
 
         <div>
