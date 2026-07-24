@@ -1,17 +1,18 @@
 import React from 'react';
 import { Search, Plus, BookOpen } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import RecipeCard from '../components/RecipeCard';
 import EmptyState from '../components/EmptyState';
 
 const RecipeListView = ({ 
   searchQuery, 
   setSearchQuery, 
-  setCurrentView, 
   filteredRecipes, 
   selectedForGroceries, 
-  setSelectedRecipeId, 
   toggleGrocerySelection 
 }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -25,12 +26,12 @@ const RecipeListView = ({
             className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
-        <button 
-          onClick={() => setCurrentView('add')}
+        <Link 
+          to="/add"
           className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 rounded-xl hover:bg-orange-700 transition w-full sm:w-auto justify-center"
         >
           <Plus className="w-5 h-5" /> Add Recipe
-        </button>
+        </Link>
       </div>
 
       {filteredRecipes.length === 0 ? (
@@ -45,8 +46,8 @@ const RecipeListView = ({
               key={recipe.id}
               recipe={recipe}
               isInGroceryList={selectedForGroceries.includes(recipe.id)}
-              onSelect={() => { setSelectedRecipeId(recipe.id); setCurrentView('detail'); }}
-              onToggleGrocery={(id) => toggleGrocerySelection({ stopPropagation: () => {} }, id)}
+              onSelect={() => navigate(`/recipe/${recipe.id}`)}
+              onToggleGrocery={(id) => toggleGrocerySelection(id)}
             />
           ))}
         </div>

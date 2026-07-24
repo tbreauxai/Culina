@@ -1,18 +1,31 @@
 import React from 'react';
 import { ArrowLeft, Trash2, Clock, BookOpen } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import IngredientItem from '../components/IngredientItem';
 
-const RecipeDetailView = ({ selectedRecipe, setCurrentView, handleDelete }) => {
-  if (!selectedRecipe) return null;
+const RecipeDetailView = ({ recipes, handleDelete }) => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  
+  const selectedRecipe = recipes.find(r => r.id === id);
+
+  if (!selectedRecipe) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <h2>Recipe not found.</h2>
+        <Link to="/" className="text-orange-500 hover:underline">Go back home</Link>
+      </div>
+    );
+  }
   
   return (
     <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
-      <button 
-        onClick={() => setCurrentView('list')}
-        className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition mb-6"
+      <Link 
+        to="/"
+        className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition mb-6 w-fit"
       >
         <ArrowLeft className="w-5 h-5" /> Back to Recipes
-      </button>
+      </Link>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
@@ -22,7 +35,7 @@ const RecipeDetailView = ({ selectedRecipe, setCurrentView, handleDelete }) => {
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{selectedRecipe.title}</h1>
         </div>
         <button 
-          onClick={() => handleDelete(selectedRecipe.id)}
+          onClick={() => handleDelete(selectedRecipe.id, () => navigate('/'))}
           className="flex items-center gap-2 text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition"
         >
           <Trash2 className="w-5 h-5" /> Delete

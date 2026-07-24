@@ -1,14 +1,13 @@
 import React from 'react';
 import { ShoppingCart, CheckCircle2, Circle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import EmptyState from '../components/EmptyState';
 
 const GroceryListView = ({ 
   recipes, 
   selectedForGroceries, 
-  setSelectedForGroceries, 
   checkedGroceries, 
-  setCheckedGroceries, 
-  setCurrentView, 
+  clearGroceryList, 
   toggleGroceryItem 
 }) => {
   const selectedRecipes = recipes.filter(r => selectedForGroceries.includes(r.id));
@@ -20,12 +19,12 @@ const GroceryListView = ({
         title="Your list is empty"
         message="Select the shopping cart icon on any recipe to add its ingredients here."
         actionButton={
-          <button 
-            onClick={() => setCurrentView('list')}
-            className="bg-orange-100 text-orange-700 px-6 py-2 rounded-xl font-semibold hover:bg-orange-200 transition"
+          <Link 
+            to="/"
+            className="bg-orange-100 text-orange-700 px-6 py-2 rounded-xl font-semibold hover:bg-orange-200 transition inline-block"
           >
             Browse Recipes
-          </button>
+          </Link>
         }
       />
     );
@@ -38,7 +37,7 @@ const GroceryListView = ({
           <ShoppingCart className="w-6 h-6 text-orange-500"/> Grocery List
         </h2>
         <button 
-          onClick={() => { setSelectedForGroceries([]); setCheckedGroceries([]); }}
+          onClick={clearGroceryList}
           className="text-sm text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition"
         >
           Clear List
