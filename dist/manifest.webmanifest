@@ -1,0 +1,1 @@
+{"name":"Culina Recipe App","short_name":"Culina","start_url":"/","display":"standalone","background_color":"#f9fafb","lang":"en","scope":"/","description":"Your personal recipe book and grocery list.","theme_color":"#ea580c","icons":[{"src":"/pwa-icon.svg","sizes":"192x192 512x512","type":"image/svg+xml","purpose":"any maskable"}]}

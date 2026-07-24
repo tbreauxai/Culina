@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- App signature orange background with rounded corners -->
+  <rect width="512" height="512" rx="112" fill="#ea580c"/>
+  <!-- Scaled and centered ChefHat icon from Lucide -->
+  <g transform="translate(106, 106) scale(12.5)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589c-.208 0-.41.034-.602.096a4 4 0 1 0-7.982 0 3.978 3.978 0 0 0-.602-.096 4 4 0 0 0-2.134 7.589c.411.197.727.584.727 1.041V20a1 1 0 0 0 1 1Z"/>
+    <path d="M6 17h12"/>
+  </g>
+</svg>
